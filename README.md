@@ -1,13 +1,14 @@
 # Project tech-template
 The goal of the 'tech-template' project is to provide examples of using various technologies and tools on the Java platform.
 
-It consists of small code examples, configurations and instructions.
-
+It consists of small code examples, configurations and instructions divided into modules:
+* minio;
 
 ## Table of Contents
 * [Code Download](#code-download)
 * [Preparation of Environment](#preparation-of-environment)
 * [Building the Project](#building-the-project)
+* [Module Minio](minio/README.md#module-minio)
 
 
 ## Code Download
