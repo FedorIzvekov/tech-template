@@ -10,9 +10,11 @@ import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fedorizvekov.minio.service.BucketService;
 import com.fedorizvekov.minio.service.DownloadService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -29,7 +31,37 @@ class StorageControllerTest {
     MockMvc mockMvc;
 
     @MockBean
+    private BucketService bucketService;
+    @MockBean
     private DownloadService downloadService;
+
+
+    @Test
+    @DisplayName("Should invoke createBucket and return CREATED")
+    public void should_invoke_createBucket_and_return_CREATED() throws Exception {
+        var bucket = "test-bucket";
+        var requestBuilder = MockMvcRequestBuilders.put("/{bucket}", bucket);
+
+        mockMvc.perform(requestBuilder).andExpect(status().isCreated());
+        verify(bucketService).createBucket(bucket);
+    }
+
+
+    @ParameterizedTest
+    @ValueSource(strings = {"12", "123456789-123456789-123456789-123456789-123456789-123456789-1234", "Test-Bucket", "test_bucket", "-test-bucket"})
+    @DisplayName("Should handle createBucket with invalid bucket name")
+    public void should_handle_createBucket_with_invalid_bucket_name(String bucket) throws Exception {
+        var requestBuilder = MockMvcRequestBuilders.put("/{bucket}", bucket);
+
+        mockMvc.perform(requestBuilder).andExpectAll(
+            status().isBadRequest(),
+            jsonPath("$.status").value("BAD_REQUEST"),
+            jsonPath("$.message").value(containsString(
+                "Bucket name should be in lowercase and include alphanumeric characters or hyphens, "
+                    + "but not start or end with a hyphen. The bucket name must be between 3 and 63 characters in length."))
+        );
+        verify(bucketService, never()).createBucket(anyString());
+    }
 
 
     @ParameterizedTest

@@ -1,10 +1,10 @@
 package com.fedorizvekov.minio.input;
 
+import com.fedorizvekov.minio.service.BucketService;
 import com.fedorizvekov.minio.service.DownloadService;
 import io.minio.errors.MinioException;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +14,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -27,6 +28,7 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 @RequiredArgsConstructor
 public class StorageController {
 
+    private final BucketService bucketService;
     private final DownloadService downloadService;
 
     private final String bucketRegexp = "^[a-z0-9][a-z0-9\\-]{1,61}[a-z0-9]$";
@@ -38,6 +40,17 @@ public class StorageController {
         + "The object name must be between 1 and 1024 characters in length.";
     private final String objectRangeRegexp = "^bytes=(\\d+-\\d+)$";
     private final String objectRangeRegexpMsg = "Object range must be of the format bytes=beginByte-endByte (bytes=0-100).";
+
+
+    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseBody
+    @PutMapping("/{bucket}")
+    public void createBucket(@Pattern(regexp = bucketRegexp, message = bucketRegexpMsg) @PathVariable String bucket)
+        throws GeneralSecurityException, IOException, MinioException {
+
+        log.info(() -> "REQUEST PUT endpoint /" + bucket);
+        bucketService.createBucket(bucket);
+    }
 
 
     @ResponseStatus(HttpStatus.OK)
