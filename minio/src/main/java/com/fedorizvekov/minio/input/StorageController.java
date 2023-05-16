@@ -2,7 +2,9 @@ package com.fedorizvekov.minio.input;
 
 import com.fedorizvekov.minio.service.BucketService;
 import com.fedorizvekov.minio.service.DownloadService;
+import com.fedorizvekov.minio.service.UploadService;
 import io.minio.errors.MinioException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.Pattern;
 import java.io.IOException;
@@ -29,6 +31,7 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 public class StorageController {
 
     private final BucketService bucketService;
+    private final UploadService uploadService;
     private final DownloadService downloadService;
 
     private final String bucketRegexp = "^[a-z0-9][a-z0-9\\-]{1,61}[a-z0-9]$";
@@ -50,6 +53,20 @@ public class StorageController {
 
         log.info(() -> "REQUEST PUT endpoint /" + bucket);
         bucketService.createBucket(bucket);
+    }
+
+
+    @ResponseStatus(HttpStatus.OK)
+    @PutMapping("/{bucket}/{object}")
+    public void uploadObject(
+        @Pattern(regexp = bucketRegexp, message = bucketRegexpMsg) @PathVariable String bucket,
+        @Pattern(regexp = objectRegexp, message = objectRegexpMsg) @PathVariable String object,
+        HttpServletRequest request,
+        HttpServletResponse response
+    ) throws GeneralSecurityException, IOException, MinioException {
+
+        log.info(() -> "REQUEST PUT endpoint /" + bucket + "/" + object);
+        uploadService.uploadObject(bucket, object, request, response);
     }
 
 
