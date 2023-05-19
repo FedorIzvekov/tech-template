@@ -1,0 +1,62 @@
+server:
+  port: 8081
+  shutdown: "graceful"
+
+spring:
+  lifecycle:
+    timeout-per-shutdown-phase: "1m"
+
+storage:
+  credentials:
+    host: ${MINIO_HOST}
+    port: ${MINIO_PORT:9000}
+    enable-https: ${MINIO_ENABLE_HTTPS:true}
+    access-key: ${MINIO_ACCESS_KEY}
+    secret-key: ${MINIO_SECRET_KEY}
+  ssl:
+    key-alias: ${SSL_KEY_ALIAS}
+    key-store-type: ${SSL_KEY_STORE_TYPE:PKCS12}
+    key-store: ${SSL_KEY_STORE}
+    key-store-password: ${SSL_KEY_STORE_PASSWORD}
+    trust-store: ${SSL_TRUST_STORE}
+    trust-store-password: ${SSL_TRUST_STORE_PASSWORD}
+  timeout:
+    connect-minutes: 40
+    write-minutes: 40
+    read-minutes: 40
+
+# Monitoring, readness, liveness, logging
+management:
+  endpoints:
+    web:
+      base-path: "/monitoring"
+      exposure:
+        include: health, info, prometheus, metrics, loggers, shutdown
+  endpoint:
+    health:
+      probes:
+        enabled: true
+    shutdown:
+      enabled: true
+    loggers:
+      enabled: true
+  info:
+    env:
+      enabled: true
+    git:
+      enabled: true
+    java:
+      enabled: true
+
+info:
+  app:
+    name: "@artifactId@"
+    version: "@version@"
+    encoding: "@project.build.sourceEncoding@"
+
+logging:
+  pattern:
+    console: "%magenta(%d{ISO8601}) %highlight(%-5level) [%yellow(%t)] %replace(RqUid=%X{RqUid}){'^RqUid=$', ''} %cyan(%C{1.}): %msg %n%throwable"
+  level:
+    com.fedorizvekov.${firstModuleName}: INFO
+    org.springframework: INFO
