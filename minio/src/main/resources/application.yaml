@@ -58,5 +58,5 @@ logging:
   pattern:
     console: "%magenta(%d{ISO8601}) %highlight(%-5level) [%yellow(%t)] %replace(RqUid=%X{RqUid}){'^RqUid=$', ''} %cyan(%C{1.}): %msg %n%throwable"
   level:
-    com.fedorizvekov.${firstModuleName}: INFO
+    com.fedorizvekov.minio: INFO
     org.springframework: INFO
